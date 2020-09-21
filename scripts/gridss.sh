@@ -186,6 +186,32 @@ do_preprocess=false
 do_assemble=false
 do_call=false
 
+if echo "'$steps' =~ /(\A|,)all(\Z|,)/ or exit 1" | perl ; then
+	do_preprocess=true
+	do_assemble=true
+	do_call=true
+fi
+if echo "'$steps' =~ /(\A|,)preprocess(\Z|,)/ or exit 1" | perl ; then
+	do_preprocess=true
+fi
+if echo "'$steps' =~ /(\A|,)assemble(\Z|,)/ or exit 1" | perl ; then
+	do_assemble=true
+fi
+if echo "'$steps' =~ /(\A|,)call(\Z|,)/ or exit 1" | perl ; then
+	do_call=true
+fi
+### Find the jars
+find_jar() {
+	env_name=$1
+	if [[ -f "${!env_name:-}" ]] ; then
+		echo "${!env_name}"
+	else
+		echo "Unable to find $2 jar. Specify using the environment variant $env_name, or the --jar command line parameter." 1>&2
+		exit 1
+	fi
+}
+gridss_jar=$(find_jar GRIDSS_JAR gridss)
+
 ##### --workingdir
 echo "Using working directory \"$workingdir\"" 1>&2
 if [[ "$workingdir" == "" ]] ; then
